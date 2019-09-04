@@ -1,0 +1,163 @@
+---
+title: "FlightDelays_Naive_Bayes"
+author: "Veera Namana"
+date: "9/1/2019"
+output: html_document
+---
+
+```{r}
+
+flight <- read.csv("FlightDelays.csv", header = TRUE)
+
+View(flight)
+
+```
+
+
+```{r}
+
+str(flight)
+
+summary(flight)
+
+table(flight$DEP_TIME)
+
+```
+
+#Data Preprocessing
+
+```{r}
+
+sum(is.na(flight))
+
+```
+
+#Convert the attributes to appropriate types
+
+
+```{r}
+flight$Weather<- as.factor(flight$Weather)
+flight$DAY_WEEK <- as.factor(flight$DAY_WEEK)
+flight$Flight.Status<- as.factor(flight$Flight.Status)
+
+str(flight)
+```
+
+
+#Categorize the departure time into bins based on client's needs
+
+```{r}
+
+flight$levels <- ifelse(flight$DEP_TIME >= 600 & flight$DEP_TIME <= 1200, "level1", ifelse(flight$DEP_TIME>1200 & flight$DEP_TIME <= 1800, "level2", ifelse(flight$DEP_TIME>1800 & flight$DEP_TIME<=2100,"level3", "level4")))
+
+flight$levels <- as.factor(flight$levels)
+
+
+str(flight)
+
+```
+
+
+#dropping the DEP_TIME column
+
+```{r}
+
+flight <- flight[, !colnames(flight) %in% c("DEP_TIME")]
+
+```
+
+
+#Train-Test Split 
+
+```{r}
+
+library(caret)
+
+train_rows <- createDataPartition(y = flight$Flight.Status, p = 0.7,list = F)
+
+train <- flight[train_rows,]
+
+test <- flight[-train_rows,]
+
+```
+
+
+#Build the Naive Bayes Classifier
+
+```{r}
+
+library(e1071)
+
+model_nb <- naiveBayes(train$Flight.Status~., train)
+
+print(model_nb)
+
+```
+
+
+#Measure the model performance in train data
+
+```{r}
+
+preds <- predict(model_nb,train)
+
+actuals <- train$Flight.Status
+
+conf_mat_train = table(actuals,preds)
+
+#Train metrics
+
+Accuracy_tr = (conf_mat_train[1,1]+conf_mat_train[2,2])/sum(conf_mat_train)
+
+Recall_tr = conf_mat_train[1,1]/(conf_mat_train[1,1]+conf_mat_train[2,2])
+
+Specificity_tr = conf_mat_train[2,2]/(conf_mat_train[2,2]+conf_mat_train[2,1])
+
+Precision_tr = conf_mat_train[1,1]/(conf_mat_train[1,1]+conf_mat_train[2,1])
+
+f1_score_tr = (2*Precision*Recall)/(Precision+Recall)
+
+output <- c(Accuracy_tr,Recall_tr,Specificity_tr,Precision_tr,f1_score_tr)
+
+print(output)
+
+```
+
+#Accuracy/ Classification Rate - 81% - The percentage of flight arrivals and delays that are predicted correctly
+
+#Recall - 96% - The flight delays correctly recognized
+
+#Specificity - 16%
+
+#Precision - 82% - flights that are delayed are indeed delayed
+
+#HIGH RECALL and LOW PRECISION - Flights that are delayed are predicted correctly. However, flights that are not delayed are predicted as delayed
+
+
+
+
+```{r}
+preds <- predict(model_nb, test)
+
+actuals <- test$Flight.Status
+
+conf_mat_test = table(actuals, preds)
+
+#Train metrics
+
+Accuracy_te = (conf_mat_test[1,1]+conf_mat_test[2,2])/sum(conf_mat_test)
+
+Recall_te = conf_mat_test[1,1]/(conf_mat_test[1,1]+conf_mat_test[2,2])
+
+Specificity_te = conf_mat_test[2,2]/(conf_mat_test[2,2]+conf_mat_test[2,1])
+
+Precision_te = conf_mat_test[1,1]/(conf_mat_test[1,1]+conf_mat_test[2,1])
+
+f1_score_te = (2*Precision*Recall)/(Precision+Recall)
+
+output_test <- c(Accuracy_te,Recall_te,Specificity_te,Precision_te,f1_score_te)
+
+print(output_test)
+
+```
+
