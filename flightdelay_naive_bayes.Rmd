@@ -109,7 +109,7 @@ conf_mat_train = table(actuals,preds)
 
 Accuracy_tr = (conf_mat_train[1,1]+conf_mat_train[2,2])/sum(conf_mat_train)
 
-Recall_tr = conf_mat_train[1,1]/(conf_mat_train[1,1]+conf_mat_train[2,2])
+Recall_tr = conf_mat_train[1,1]/(conf_mat_train[1,1]+conf_mat_train[1,2])
 
 Specificity_tr = conf_mat_train[2,2]/(conf_mat_train[2,2]+conf_mat_train[2,1])
 
@@ -125,13 +125,13 @@ print(output)
 
 #Accuracy/ Classification Rate - 81% - The percentage of flight arrivals and delays that are predicted correctly
 
-#Recall - 96% - The flight delays correctly recognized
+#Recall - 20% - The flight delays correctly recognized
 
 #Specificity - 95% - Flights that are on time are recognized correctly
 
 #Precision - 82% - flights that are delayed are indeed delayed
 
-#HIGH RECALL and LOW PRECISION - Flights that are delayed are predicted correctly. However, flights that are not delayed are predicted as delayed
+#LOW RECALL and HIGH PRECISION - Flights that are delayed are predicted incorrectly. However, flights that are delayed are indeed delayed
 
 
 
