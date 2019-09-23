@@ -127,7 +127,7 @@ print(output)
 
 #Recall - 96% - The flight delays correctly recognized
 
-#Specificity - 16%
+#Specificity - 95% - Flights that are on time are recognized correctly
 
 #Precision - 82% - flights that are delayed are indeed delayed
 
