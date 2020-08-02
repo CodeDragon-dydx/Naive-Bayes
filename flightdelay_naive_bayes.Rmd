@@ -1,15 +1,44 @@
 ---
-title: "FlightDelays_Naive_Bayes"
-author: "Veera Namana"
-date: "9/1/2019"
-output: html_document
+title: "Naive_Bayes"
+author: "Veera_Namana"
+output: pdf_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+getwd()
+
+setwd("/Users/tejaswinamana/Downloads/practice")
+```
+
+
+#Read data file
 ```{r}
 
-flight <- read.csv("FlightDelays.csv", header = TRUE)
-
-View(flight)
+flight <- read.csv(file = "FlightDelays.csv", header = T, sep = ",")
 
 ```
 
@@ -20,70 +49,66 @@ str(flight)
 
 summary(flight)
 
-table(flight$DEP_TIME)
-
 ```
 
 #Data Preprocessing
 
+#Check for missing value
 ```{r}
 
 sum(is.na(flight))
 
 ```
 
-#Convert the attributes to appropriate types
-
-
+#Convert the attributes to appropriate type
 ```{r}
-flight$Weather<- as.factor(flight$Weather)
-flight$DAY_WEEK <- as.factor(flight$DAY_WEEK)
-flight$Flight.Status<- as.factor(flight$Flight.Status)
 
-str(flight)
+flight$Weather <- as.factor(flight$Weather)
+
+flight$DAY_WEEK <- as.factor(flight$DAY_WEEK)
+
+flight$Flight.Status <- ifelse(flight$Flight.Status == 0,"on-time", "delayed")
+
+flight$Flight.Status <- as.factor(flight$Flight.Status)
+
 ```
 
 
-#Categorize the departure time into bins based on client's needs
-
+#categorize departure time into bins based on your client needs
 ```{r}
 
-flight$levels <- ifelse(flight$DEP_TIME >= 600 & flight$DEP_TIME <= 1200, "level1", ifelse(flight$DEP_TIME>1200 & flight$DEP_TIME <= 1800, "level2", ifelse(flight$DEP_TIME>1800 & flight$DEP_TIME<=2100,"level3", "level4")))
+
+
+flight$levels <- ifelse(flight$DEP_TIME>=600 & flight$DEP_TIME<1200, "level1",
+                      ifelse(flight$DEP_TIME>=1200 & flight$DEP_TIME<1800, "level2",
+                             ifelse(flight$DEP_TIME>=1800 & flight$DEP_TIME<=2100, "level3", "level4")))
+
 
 flight$levels <- as.factor(flight$levels)
 
-
 str(flight)
-
 ```
 
-
-#dropping the DEP_TIME column
-
+#The DEP_TIME column can now be dropped
 ```{r}
 
-flight <- flight[, !colnames(flight) %in% c("DEP_TIME")]
-
+flight <- flight[,!colnames(flight) %in% c("DEP_TIME")]
 ```
 
-
-#Train-Test Split 
-
+#Train - Test split
 ```{r}
 
 library(caret)
 
-train_rows <- createDataPartition(y = flight$Flight.Status, p = 0.7,list = F)
+train_rows <- createDataPartition(y = flight$Flight.Status, p = 0.7, list = F)
 
 train <- flight[train_rows,]
 
-test <- flight[-train_rows,]
+test <- flight[-train_rows]
 
 ```
 
-
-#Build the Naive Bayes Classifier
-
+#Build the Naive Bayes classifier
 ```{r}
 
 library(e1071)
@@ -94,70 +119,4 @@ print(model_nb)
 
 ```
 
-
-#Measure the model performance in train data
-
-```{r}
-
-preds <- predict(model_nb,train)
-
-actuals <- train$Flight.Status
-
-conf_mat_train = table(actuals,preds)
-
-#Train metrics
-
-Accuracy_tr = (conf_mat_train[1,1]+conf_mat_train[2,2])/sum(conf_mat_train)
-
-Recall_tr = conf_mat_train[1,1]/(conf_mat_train[1,1]+conf_mat_train[1,2])
-
-Specificity_tr = conf_mat_train[2,2]/(conf_mat_train[2,2]+conf_mat_train[2,1])
-
-Precision_tr = conf_mat_train[1,1]/(conf_mat_train[1,1]+conf_mat_train[2,1])
-
-f1_score_tr = (2*Precision*Recall)/(Precision+Recall)
-
-output <- c(Accuracy_tr,Recall_tr,Specificity_tr,Precision_tr,f1_score_tr)
-
-print(output)
-
-```
-
-#Accuracy/ Classification Rate - 81% - The percentage of flight arrivals and delays that are predicted correctly
-
-#Recall - 20% - The flight delays correctly recognized
-
-#Specificity - 95% - Flights that are on time are recognized correctly
-
-#Precision - 82% - flights that are delayed are indeed delayed
-
-#LOW RECALL and HIGH PRECISION - Flights that are delayed are predicted incorrectly. However, flights that are delayed are indeed delayed
-
-
-
-
-```{r}
-preds <- predict(model_nb, test)
-
-actuals <- test$Flight.Status
-
-conf_mat_test = table(actuals, preds)
-
-#Train metrics
-
-Accuracy_te = (conf_mat_test[1,1]+conf_mat_test[2,2])/sum(conf_mat_test)
-
-Recall_te = conf_mat_test[1,1]/(conf_mat_test[1,1]+conf_mat_test[2,2])
-
-Specificity_te = conf_mat_test[2,2]/(conf_mat_test[2,2]+conf_mat_test[2,1])
-
-Precision_te = conf_mat_test[1,1]/(conf_mat_test[1,1]+conf_mat_test[2,1])
-
-f1_score_te = (2*Precision*Recall)/(Precision+Recall)
-
-output_test <- c(Accuracy_te,Recall_te,Specificity_te,Precision_te,f1_score_te)
-
-print(output_test)
-
-```
 
