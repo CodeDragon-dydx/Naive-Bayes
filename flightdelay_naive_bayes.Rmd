@@ -174,7 +174,7 @@ f1_score = (2 * precision * recall)/(precision + recall)
 
 ```
 
-## Printing the train data performance metrics
+## Printing the test data performance metrics
 ```{r}
 
 print(accuracy)
