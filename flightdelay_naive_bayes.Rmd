@@ -104,7 +104,7 @@ train_rows <- createDataPartition(y = flight$Flight.Status, p = 0.7, list = F)
 
 train <- flight[train_rows,]
 
-test <- flight[-train_rows]
+test <- flight[-train_rows,]
 
 ```
 
@@ -116,6 +116,72 @@ library(e1071)
 model_nb <- naiveBayes(train$Flight.Status~., train)
 
 print(model_nb)
+
+```
+
+#Measure the model performance on train data
+
+```{r}
+
+preds <- predict(model_nb, train)
+
+actuals = train$Flight.Status
+
+conf_mat_train = table(actuals, preds)
+
+```
+
+#Train Metrics
+
+```{r}
+
+accuracy = (conf_mat_train[1,1] + conf_mat_train[2,2])/sum(conf_mat_train)
+recall = (conf_mat_train[1,1])/(conf_mat_train[1,1] + conf_mat_train[1,2])
+specificity = (conf_mat_train[2,2])/(conf_mat_train[2,1] + conf_mat_train[2,2])
+precision = (conf_mat_train[1,1])/(conf_mat_train[1,1] + conf_mat_train[2,1])
+f1_score = (2 * precision * recall)/(precision + recall)
+
+```
+
+## Printing the train data performance metrics
+
+```{r}
+
+print(accuracy)
+print(recall)
+print(specificity)
+print(precision)
+print(f1_score)
+
+```
+
+## Measure the Model Performace on test data
+```{r}
+
+preds <- predict(model_nb, test)
+
+actuals = test$Flight.Status
+
+conf_mat_test = table(actuals, preds)
+
+# Train Metrics
+accuracy = (conf_mat_test[1,1] + conf_mat_test[2,2])/sum(conf_mat_test)
+recall = (conf_mat_test[1,1])/(conf_mat_test[1,1] + conf_mat_test[1,2])
+specificity = (conf_mat_test[2,2])/(conf_mat_test[2,1] + conf_mat_test[2,2])
+precision = (conf_mat_test[1,1])/(conf_mat_test[1,1] + conf_mat_test[2,1])
+f1_score = (2 * precision * recall)/(precision + recall)
+
+
+```
+
+## Printing the train data performance metrics
+```{r}
+
+print(accuracy)
+print(recall)
+print(specificity)
+print(precision)
+print(f1_score)
 
 ```
 
